@@ -1,0 +1,75 @@
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .fl {
+    float: left;
+  }
+.hornet-box {
+    border: 1px solid #999;
+    border-radius: 5px;
+    padding-left: 10px;
+    margin: 20px;
+    min-width:20em;
+    min-height:30em;
+    padding:1em
+}
+.hornet-box.image-renderer {
+  padding: 0;
+}
+
+.action-element {  float: left;
+    margin: 18px 0;
+    vertical-align: middle;
+}
+
+.cropper {
+  background: transparent;
+  border: 1px solid #999;
+  border-radius: 3px;
+}
+
+#image{
+  position: absolute;
+}
+
+.react-draggable, .cursor {
+  cursor: move;
+}
+.no-cursor {
+  cursor: auto;
+}
+.cursor-y {
+  cursor: ns-resize;
+}
+.cursor-x {
+  cursor: ew-resize;
+}
+.react-draggable strong {
+  background: #ddd;
+  border: 1px solid #999;
+  border-radius: 3px;
+  display: block;
+  margin-bottom: 10px;
+  padding: 3px 5px;
+  text-align: center;
+}
+
+
+
+
+
+.button {
+  fill: black;
+}
+
+a .button-svg:hover, .button:focus {
+  opacity:0.7;
+  /* fill: darkgrey; */
+}
+
+.button-svg {
+  height: 36px;
+  width: 36px;
+}
