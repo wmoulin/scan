@@ -22,6 +22,8 @@ export class App extends React.Component {
     this.rotateCount = 0;
     this.zoomImageCount = 0;
     this.scale = 1;
+    this.rotate = 0;
+    this.hasRotate = false;
 
     this.state = {
       dataOptions: {},
@@ -197,13 +199,14 @@ export class App extends React.Component {
     let dataCrop = this.state.dataCrop;
     ScanActions.scan(preview, this.state.dataHost, { idScanner: this.state.scannerSelected }, true).then((data) => {
       this.urlObjectImage = URL.createObjectURL(new Blob([this.fixBinary(atob(data))]));
-      const { context, imageSource } = this.initContextAndImage();
+      const { context, imageSource } = this.initContextAndImage(true, true);
       this.canvas.width = CANVAS_WIDTH;
       this.canvas.height = CANVAS_HEIGHT;
       context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       imageSource.onload = () => {
-        context.translate((this.canvas.width - imageSource.width) / 2, (this.canvas.height - imageSource.height) / 2);
-        context.drawImage(imageSource, 0, 0, imageSource.width, imageSource.height);
+        //context.translate((this.canvas.width - imageSource.width) / 2, (this.canvas.height - imageSource.height) / 2);
+        context.drawImage(imageSource, 0, 0);//, imageSource.width, imageSource.height);
+        context.save(); 
         this.setState({ isScanned: true, imgSize: { w: imageSource.width, h: imageSource.height } });
       }
 
@@ -220,23 +223,42 @@ export class App extends React.Component {
     link.click();
   }
 
-  initContextAndImage(clear) {
+  initContextAndImage(clear, reset) {
     const imageSource = new Image();
     imageSource.src = this.urlObjectImage;
+    const context = this.canvas.getContext('2d');
+
+    if(clear === true) {
+      context.scale(1, 1);
+      context.translate(0, 0);
+      context.rotate(0);
+      if(reset === true) {
+        this.rotateCount = 0;
+        this.scale = 1;
+        this.zoomImageCount = 0;
+        this.rotate = 0;
+      }
+    }
+
     return {
-      context: this.canvas.getContext('2d'),
+      context: context,
       imageSource: imageSource
     }
   }
 
+
   handleCrop() {
     const context = this.canvas.getContext('2d');
-    // const imageSource = context.getImageData();
-    context.clearRect(-1000, -1000, 5000, 5000);
-    // imageSource.onload = () => {
-      // context.save(); 
+     const imageSource = context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    //
+    //imageSource.onload = () => {
+      context.save(); 
+      const imageCrop = new Image();
+      imageCrop.src = this.canvas.toDataURL('image/png');
+      context.clearRect(-1000, -1000, 5000, 5000);
+      imageCrop.onload = () => {
       context.drawImage(
-        this.canvas,
+        imageCrop,
         this.state.dataCrop.x + this.state.dataCrop.originX,
         this.state.dataCrop.y + this.state.dataCrop.originY,
         this.state.dataCrop.width,
@@ -245,40 +267,94 @@ export class App extends React.Component {
         0,
         this.canvas.width,
         this.canvas.height
-      );
-      // context.restore(); 
-    // }
-
+      )
+    };
   }
 
   handleRotate(isRight) {
+    this.hasRotate = true;
     isRight ? this.rotateCount++ : this.rotateCount--;
+    isRight ? this.rotate = 1 : this.rotate = -1;
+    if(this.rotateCount == 4) {this.rotateCount = 0;}
+    if(this.rotateCount == -1) {this.rotateCount = 3;}
     this.updateImage();
   }
 
   updateImage() {
-    const { context, imageSource } = this.initContextAndImage();
+    const { context, imageSource } = this.initContextAndImage(true);
+    //context.restore();
     context.clearRect(-1000, -1000, 5000, 5000);
+ 
     imageSource.onload = () => {
-      context.save(); 
-      if(this.rotateCount) {
-        // context.translate((imageSource.width/2), (imageSource.height/2));
-        context.rotate((this.rotateCount * 90) * Math.PI / 180);
+      if(this.rotate !== 0) {
+        switch(this.rotate) {
+          case 1:
+            context.translate(+imageSource.height, 0);
+            
+            break;
+          case -1:
+          context.translate(0, +(imageSource.width));
+            break;
+        }
+        context.rotate( this.rotate * 90 * Math.PI / 180);
+
+
+        /*switch(this.rotateCount) {
+          case 1:
+            context.translate(0, -(imageSource.height));
+            break;
+          case 2:
+            context.translate(-(imageSource.width), -(imageSource.height));
+            break;
+          case 3:
+            context.translate(-(imageSource.width), 0);
+            break;
+        }*/
       }
-      context.scale(this.scale, this.scale);
-      context.drawImage(imageSource, -(imageSource.width/2), -(imageSource.height/2));
-      context.restore(); 
+
+      if(this.scale !== 1) {
+        //context.save(); 
+        //context.setTransform(1, 0, 0, 1, 0, 0);
+        //context.translate(0, 0);
+
+        context.scale(this.scale, this.scale);
+        if(this.scale < 1 && this.scale > 0 && this.rotateCount !== 0) {
+          switch(this.rotateCount) {
+            case 1:
+              context.translate(0, imageSource.width * this.scale);
+              break;
+            case 2:
+              context.translate(imageSource.width * this.scale, imageSource.height * this.scale);
+              break;
+            case 3:
+              context.translate(imageSource.height * this.scale, 0);
+              break;
+          }
+        }
+
+        //context.restore(); 
+      }
+
+      context.drawImage(imageSource, 0, 0);//-(imageSource.width/2), -(imageSource.height/2));
+      //context.save(); 
+      this.scale = 1;
+      this.rotate = 0;
+      //context.restore(); 
     }
   }
 
   handleZoomImage(more) {
     more ? this.zoomImageCount ++: this.zoomImageCount --;
     this.scale = 1;
-    if(this.zoomImageCount > 0) {
-      this.scale = this.zoomImageCount * SCALE_ZOOM;
-    } else if(this.zoomImageCount < 0){
-      this.scale = 1 / (Math.abs(this.zoomImageCount) * SCALE_ZOOM);
-    }
+    //if(this.zoomImageCount >= 0) {
+      if(more === false){
+        this.scale = 1 / SCALE_ZOOM;
+      } else {
+        this.scale = 1 * SCALE_ZOOM;
+      }
+    //} else if(this.zoomImageCount < 0){
+    //  this.scale = 1 / (Math.abs(this.zoomImageCount) * SCALE_ZOOM);
+    //}
     this.updateImage();
   }
 }
