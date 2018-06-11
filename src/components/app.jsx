@@ -24,6 +24,8 @@ export class App extends React.Component {
     this.scale = 1;
     this.rotate = 0;
     this.hasRotate = false;
+    //this.reduceCoef = 0.5;
+    this.reduceCoef = 2;
 
     this.state = {
       dataOptions: {},
@@ -286,60 +288,98 @@ export class App extends React.Component {
     context.clearRect(-1000, -1000, 5000, 5000);
  
     imageSource.onload = () => {
-      if(this.rotate !== 0) {
-        switch(this.rotate) {
-          case 1:
-            context.translate(+imageSource.height, 0);
-            
-            break;
-          case -1:
-          context.translate(0, +(imageSource.width));
-            break;
+      context.save(); 
+      if(this.zoomImageCount !== 0) {
+        var coeffScale = 1;
+        if(this.zoomImageCount >= 0) {
+          coeffScale = 1 * Math.abs(this.zoomImageCount) * SCALE_ZOOM;
+        } else if(this.zoomImageCount < 0){
+          coeffScale = 1 / (Math.abs(this.zoomImageCount) * SCALE_ZOOM);
         }
-        context.rotate( this.rotate * 90 * Math.PI / 180);
-
-
-        /*switch(this.rotateCount) {
-          case 1:
-            context.translate(0, -(imageSource.height));
-            break;
-          case 2:
-            context.translate(-(imageSource.width), -(imageSource.height));
-            break;
-          case 3:
-            context.translate(-(imageSource.width), 0);
-            break;
-        }*/
+        context.scale(coeffScale, coeffScale);
       }
-
-      if(this.scale !== 1) {
-        //context.save(); 
-        //context.setTransform(1, 0, 0, 1, 0, 0);
-        //context.translate(0, 0);
-
-        context.scale(this.scale, this.scale);
-        if(this.scale < 1 && this.scale > 0 && this.rotateCount !== 0) {
-          switch(this.rotateCount) {
+      const coor = {x: 0, y: 0};
+      if(this.rotateCount !== 0) {
+          /*switch(this.rotate) {
             case 1:
-              context.translate(0, imageSource.width * this.scale);
+              context.translate(+imageSource.height, 0);
+              
               break;
-            case 2:
-              context.translate(imageSource.width * this.scale, imageSource.height * this.scale);
-              break;
-            case 3:
-              context.translate(imageSource.height * this.scale, 0);
+            case -1:
+            context.translate(0, +(imageSource.width));
               break;
           }
+          context.rotate( this.rotate * (this.rotateCount * 90) * Math.PI / 180);*/
+        switch(this.rotateCount) {
+          case 1:
+            context.translate(imageSource.height, 0);
+            break;
+          case 2:
+            context.translate(imageSource.height, 0);
+          case 3:
+            context.translate(0, imageSource.width);
+            break;
         }
-
-        //context.restore(); 
+        context.rotate( (this.rotateCount * 90) * Math.PI / 180);
+        
       }
 
-      context.drawImage(imageSource, 0, 0);//-(imageSource.width/2), -(imageSource.height/2));
+      /*if(this.scale !== 1) {
+        
+        if(this.scale < 1 && this.scale > 0 && this.rotateCount !== 0) {
+          
+          this.hasRotate = false;
+          switch(this.rotateCount) {
+            case 1:
+              coor.y= (imageSource.width * this.scale * SCALE_ZOOM);
+              //coor.y= (imageSource.width * this.scale * SCALE_ZOOM) * this.reduceCoef;
+              //context.translate(-imageSource.width * this.zoomImageCount * SCALE_ZOOM, 0);
+              break;
+            case 2:
+              coor.x = (imageSource.width * this.scale * SCALE_ZOOM);
+              coor.y = (imageSource.height * this.scale * SCALE_ZOOM);
+              //coor.x = (imageSource.width * this.scale * SCALE_ZOOM) * this.reduceCoef;
+              //coor.y = (imageSource.height * this.scale * SCALE_ZOOM) * this.reduceCoef;
+              //context.translate(imageSource.width * this.zoomImageCount * SCALE_ZOOM, imageSource.height * SCALE_ZOOM);
+              break;
+            case 3:
+              coor.x = (imageSource.height * this.scale * SCALE_ZOOM);
+              //coor.x = (imageSource.height * this.scale * SCALE_ZOOM) * this.reduceCoef;
+              //context.translate(imageSource.height * this.zoomImageCount * SCALE_ZOOM, 0);
+              break;
+          }
+          
+          context.translate(coor.x / ( this.reduceCoef * SCALE_ZOOM), coor.y / ( this.reduceCoef * SCALE_ZOOM));
+          coor.x=0;
+          coor.y=0;
+        } else if(this.scale > 1 && this.rotateCount !== 0) {
+          switch(this.rotateCount) {
+            case 1:
+              coor.x= (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
+              coor.y= (imageSource.width * this.zoomImageCount * SCALE_ZOOM);
+              //coor.y= (imageSource.height * this.scale);
+              break;
+            case 2:
+              coor.y = (imageSource.width * this.zoomImageCount * SCALE_ZOOM);
+              coor.x = (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
+              break;
+            case 3:
+              coor.x = (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
+              coor.y = (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
+              break;
+          }
+          context.translate(-coor.x *( 1.83), -(coor.y  * 1.83));
+        }
+        context.scale(this.scale, this.scale);
+        
+        //context.restore(); 
+      }*/
+
+      context.drawImage(imageSource, coor.x, coor.y);//-(imageSource.width/2), -(imageSource.height/2));
       //context.save(); 
       this.scale = 1;
       this.rotate = 0;
-      //context.restore(); 
+      context.restore(); 
     }
   }
 
