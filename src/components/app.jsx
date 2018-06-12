@@ -11,21 +11,11 @@ const SCALE_ZOOM = 1.5;
 
 export class App extends React.Component {
 
-  canvas;
-  rotateCount;
-  urlObjectImage;
-  zoomImageCount;
-
   constructor(props) {
     super(props);
 
     this.rotateCount = 0;
     this.zoomImageCount = 0;
-    this.scale = 1;
-    this.rotate = 0;
-    this.hasRotate = false;
-    //this.reduceCoef = 0.5;
-    this.reduceCoef = 2;
 
     this.state = {
       dataOptions: {},
@@ -67,6 +57,9 @@ export class App extends React.Component {
     }
   }
 
+  /**
+   * 
+   */
   render() {
 
     return (
@@ -107,6 +100,9 @@ export class App extends React.Component {
       </select>);
   }
 
+  /**
+   * Rendu des boutons d'action scanner
+   */
   renderActionButtons() {
     return (
       <div className="element">
@@ -118,6 +114,9 @@ export class App extends React.Component {
     );
   }
 
+  /**
+   * Rendu de la zone de crop
+   */
   renderCropper() {
 
     var style = {
@@ -135,7 +134,9 @@ export class App extends React.Component {
     )
   }
 
-
+  /**
+   * Rendu des boutons d'action de l'éditeur
+   */
   renderToolCrop() {
     return (
       <div>
@@ -195,7 +196,7 @@ export class App extends React.Component {
       arr[i] = bin.charCodeAt(i);
     }
     return buf;
-}
+  }
 
   handleClickScan(preview) {
     let dataCrop = this.state.dataCrop;
@@ -208,7 +209,6 @@ export class App extends React.Component {
       imageSource.onload = () => {
         //context.translate((this.canvas.width - imageSource.width) / 2, (this.canvas.height - imageSource.height) / 2);
         context.drawImage(imageSource, 0, 0);//, imageSource.width, imageSource.height);
-        context.save(); 
         this.setState({ isScanned: true, imgSize: { w: imageSource.width, h: imageSource.height } });
       }
 
@@ -217,7 +217,9 @@ export class App extends React.Component {
     });
   }
 
-
+  /**
+   * Listener sur la sauvegarde
+   */
   handleSave() {
     var link = document.createElement("a");
     link.setAttribute("href", this.canvas.toDataURL('image/png'));
@@ -236,9 +238,7 @@ export class App extends React.Component {
       context.rotate(0);
       if(reset === true) {
         this.rotateCount = 0;
-        this.scale = 1;
         this.zoomImageCount = 0;
-        this.rotate = 0;
       }
     }
 
@@ -248,47 +248,63 @@ export class App extends React.Component {
     }
   }
 
-
+  /**
+   * Listener de redimensionnement suivant la sélection
+   */
   handleCrop() {
-    const context = this.canvas.getContext('2d');
-     const imageSource = context.getImageData(0, 0, this.canvas.width, this.canvas.height);
-    //
-    //imageSource.onload = () => {
-      context.save(); 
-      const imageCrop = new Image();
-      imageCrop.src = this.canvas.toDataURL('image/png');
+    const { context, imageSource } = this.initContextAndImage(true);
+     
+       this.urlObjectImage = context.getImageData(this.state.dataCrop.x, this.state.dataCrop.y, this.state.dataCrop.width, this.state.dataCrop.height);
+
+      // affichage dans un autre canvas
+      var canvasBis = document.createElement('canvas');
+      var contextBis = canvasBis.getContext('2d');
+      canvasBis.width = this.state.dataCrop.width;
+      canvasBis.height = this.state.dataCrop.height;
+      contextBis.putImageData(this.urlObjectImage, 0, 0);
+      this.urlObjectImage = canvasBis.toDataURL();
+
+      // reaffichage de l'extract
       context.clearRect(-1000, -1000, 5000, 5000);
-      imageCrop.onload = () => {
-      context.drawImage(
-        imageCrop,
-        this.state.dataCrop.x + this.state.dataCrop.originX,
-        this.state.dataCrop.y + this.state.dataCrop.originY,
-        this.state.dataCrop.width,
-        this.state.dataCrop.height,
-        0,
-        0,
-        this.canvas.width,
-        this.canvas.height
-      )
-    };
+      this.initContextAndImage(true, true);
+      this.updateImage(true);
+    //};
   }
 
+  /**
+   * Listener sur la rotation
+   * @param {boolean} isRight 
+   */
   handleRotate(isRight) {
-    this.hasRotate = true;
     isRight ? this.rotateCount++ : this.rotateCount--;
-    isRight ? this.rotate = 1 : this.rotate = -1;
     if(this.rotateCount == 4) {this.rotateCount = 0;}
     if(this.rotateCount == -1) {this.rotateCount = 3;}
-    this.updateImage();
+    this.updateImage(true);
   }
 
-  updateImage() {
+  /**
+   * Listener sur le ZOOM
+   * @param {boolean} more 
+   */
+  handleZoomImage(more) {
+    more ? this.zoomImageCount ++: this.zoomImageCount --;
+    this.updateImage(true);
+  }
+
+  /**
+   * Applique les transformations de zoom et rotation
+   */
+  updateImage(redraw) {
+    
     const { context, imageSource } = this.initContextAndImage(true);
-    //context.restore();
+    
+    // suppression du contenu
     context.clearRect(-1000, -1000, 5000, 5000);
  
     imageSource.onload = () => {
+      // sauvegarde du contexte pour le restaurer à la fin des transformations
       context.save(); 
+
       if(this.zoomImageCount !== 0) {
         var coeffScale = 1;
         if(this.zoomImageCount >= 0) {
@@ -298,24 +314,15 @@ export class App extends React.Component {
         }
         context.scale(coeffScale, coeffScale);
       }
-      const coor = {x: 0, y: 0};
+
       if(this.rotateCount !== 0) {
-          /*switch(this.rotate) {
-            case 1:
-              context.translate(+imageSource.height, 0);
-              
-              break;
-            case -1:
-            context.translate(0, +(imageSource.width));
-              break;
-          }
-          context.rotate( this.rotate * (this.rotateCount * 90) * Math.PI / 180);*/
         switch(this.rotateCount) {
           case 1:
             context.translate(imageSource.height, 0);
             break;
           case 2:
-            context.translate(imageSource.height, 0);
+            context.translate(imageSource.width, imageSource.height);
+            break;
           case 3:
             context.translate(0, imageSource.width);
             break;
@@ -323,78 +330,13 @@ export class App extends React.Component {
         context.rotate( (this.rotateCount * 90) * Math.PI / 180);
         
       }
-
-      /*if(this.scale !== 1) {
-        
-        if(this.scale < 1 && this.scale > 0 && this.rotateCount !== 0) {
-          
-          this.hasRotate = false;
-          switch(this.rotateCount) {
-            case 1:
-              coor.y= (imageSource.width * this.scale * SCALE_ZOOM);
-              //coor.y= (imageSource.width * this.scale * SCALE_ZOOM) * this.reduceCoef;
-              //context.translate(-imageSource.width * this.zoomImageCount * SCALE_ZOOM, 0);
-              break;
-            case 2:
-              coor.x = (imageSource.width * this.scale * SCALE_ZOOM);
-              coor.y = (imageSource.height * this.scale * SCALE_ZOOM);
-              //coor.x = (imageSource.width * this.scale * SCALE_ZOOM) * this.reduceCoef;
-              //coor.y = (imageSource.height * this.scale * SCALE_ZOOM) * this.reduceCoef;
-              //context.translate(imageSource.width * this.zoomImageCount * SCALE_ZOOM, imageSource.height * SCALE_ZOOM);
-              break;
-            case 3:
-              coor.x = (imageSource.height * this.scale * SCALE_ZOOM);
-              //coor.x = (imageSource.height * this.scale * SCALE_ZOOM) * this.reduceCoef;
-              //context.translate(imageSource.height * this.zoomImageCount * SCALE_ZOOM, 0);
-              break;
-          }
-          
-          context.translate(coor.x / ( this.reduceCoef * SCALE_ZOOM), coor.y / ( this.reduceCoef * SCALE_ZOOM));
-          coor.x=0;
-          coor.y=0;
-        } else if(this.scale > 1 && this.rotateCount !== 0) {
-          switch(this.rotateCount) {
-            case 1:
-              coor.x= (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
-              coor.y= (imageSource.width * this.zoomImageCount * SCALE_ZOOM);
-              //coor.y= (imageSource.height * this.scale);
-              break;
-            case 2:
-              coor.y = (imageSource.width * this.zoomImageCount * SCALE_ZOOM);
-              coor.x = (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
-              break;
-            case 3:
-              coor.x = (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
-              coor.y = (imageSource.height * this.zoomImageCount * SCALE_ZOOM);
-              break;
-          }
-          context.translate(-coor.x *( 1.83), -(coor.y  * 1.83));
-        }
-        context.scale(this.scale, this.scale);
-        
-        //context.restore(); 
-      }*/
-
-      context.drawImage(imageSource, coor.x, coor.y);//-(imageSource.width/2), -(imageSource.height/2));
-      //context.save(); 
-      this.scale = 1;
-      this.rotate = 0;
+      if(redraw === true) {
+        context.drawImage(imageSource, 0, 0);
+      }
+      
+      // restauration du context
       context.restore(); 
     }
   }
 
-  handleZoomImage(more) {
-    more ? this.zoomImageCount ++: this.zoomImageCount --;
-    this.scale = 1;
-    //if(this.zoomImageCount >= 0) {
-      if(more === false){
-        this.scale = 1 / SCALE_ZOOM;
-      } else {
-        this.scale = 1 * SCALE_ZOOM;
-      }
-    //} else if(this.zoomImageCount < 0){
-    //  this.scale = 1 / (Math.abs(this.zoomImageCount) * SCALE_ZOOM);
-    //}
-    this.updateImage();
-  }
 }
