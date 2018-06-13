@@ -3,6 +3,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const PurifyCSSPlugin = require('purifycss-webpack-plugin');
 const merge = require('webpack-merge');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 /*
  * Dev configurations
@@ -64,21 +65,20 @@ exports.setupCSS = (paths) => {
 // Minification
 exports.minify = () => {
   return {
-    plugins: [
-      new webpack.optimize.UglifyJsPlugin({
-        beautify: false,
-        comments: false,
-        compress: {
-          warnings: false,
-          drop_console: true
-        },
-        mangle: {
-          except: ['$', 'webpackJsonp'],
-          screw_ie8: true,
-          keep_fnames: true
-        }
-      })
-    ]
+    optimization: {
+      minimizer: [
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            compress: {
+              warnings: true,
+              drop_console: true
+            },
+            mangle: true,
+            ecma: 5
+          }
+        })
+      ]
+    }
   };
 }
 

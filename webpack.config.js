@@ -71,18 +71,19 @@ switch (process.env.npm_lifecycle_event) {
   case "stats":
     config = merge(
       common, {
+        mode: "production",
         devtool: "source-map",
         output: {
-          filename: "static/js/[name].[chunkhash].js",
+          filename: "static/js/[name].[id].js",
           chunkFilename: "static/js/[chunkhash].js"
         }
       },
       configParts.clean(PATHS.build),
       configParts.setFreeVariable("process.env.NODE_ENV", "production"),
-      configParts.extractBundle({
+      /*configParts.extractBundle({
         name: "vendor",
         entries: Object.keys(pkg.dependencies)
-      }),
+      }),*/
       configParts.minify()
     );
     break;
