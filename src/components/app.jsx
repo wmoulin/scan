@@ -50,7 +50,7 @@ export class App extends React.Component {
     if (dataHost) {
       this.setState({ dataHost: JSON.parse(dataHost) }, () => {
         // Récupération des options liées aux scanners
-        ScanActions.getScanners().then((scanners) => {
+        ScanActions.getScanners(this.state.dataHost).then((scanners) => {
           this.setState({ dataOptions: scanners });
         })
       });
@@ -62,14 +62,27 @@ export class App extends React.Component {
    */
   render() {
 
+    const divStyle = {
+      position: 'relative',
+      // width: CANVAS_WIDTH + "px",
+      // height: CANVAS_HEIGHT + "px"
+    };
+
+    const canvasProps = {
+      id: "canvas",
+      // width: CANVAS_WIDTH + "px",
+      // height: CANVAS_HEIGHT + "px",
+      ref: this.registerCanvas.bind(this)
+    }
+
     return (
       <div className="hornet-scanner">
         <div className="form">
           <div className="select-area">{this.renderListScanners()}</div>
           <div className="buttons-area">{this.state.scannerSelected && this.renderActionButtons()}</div>
         </div>
-        <div className="hornet-box image-renderer" style={{ position: 'relative', width: CANVAS_WIDTH + "px", height: CANVAS_HEIGHT + "px", }}>
-          <canvas id="canvas" width={CANVAS_WIDTH + "px"} height={CANVAS_HEIGHT + "px"} ref={this.registerCanvas.bind(this)} />
+        <div className="hornet-box image-renderer" style={divStyle}>
+          <canvas {...canvasProps}/>
           {this.state.isScanned && this.renderCropper()}
         </div>
         {this.state.isScanned && this.renderToolCrop()}
@@ -201,15 +214,15 @@ export class App extends React.Component {
   handleClickScan(preview) {
     let dataCrop = this.state.dataCrop;
     ScanActions.scan(preview, this.state.dataHost, { idScanner: this.state.scannerSelected }, true).then((data) => {
-      this.urlObjectImage = URL.createObjectURL(new Blob([this.fixBinary(atob(data))]));
+      this.urlObjectImage = URL.createObjectURL(new Blob([this.fixBinary(atob(data.image))]));
       const { context, imageSource } = this.initContextAndImage(true, true);
-      this.canvas.width = CANVAS_WIDTH;
-      this.canvas.height = CANVAS_HEIGHT;
+      this.canvas.width = data.width;
+      this.canvas.height = data.height;
       context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       imageSource.onload = () => {
         //context.translate((this.canvas.width - imageSource.width) / 2, (this.canvas.height - imageSource.height) / 2);
         context.drawImage(imageSource, 0, 0);//, imageSource.width, imageSource.height);
-        this.setState({ isScanned: true, imgSize: { w: imageSource.width, h: imageSource.height } });
+        this.setState({ isScanned: true });
       }
 
     }).catch(function (err) {
