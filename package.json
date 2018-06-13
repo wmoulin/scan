@@ -1,7 +1,7 @@
 {
-  "name": "ReactAshemer",
+  "name": "scan",
   "version": "1.0.0",
-  "description": "ReactAshemer",
+  "description": "scanner component",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,13 +13,13 @@
   "author": "glotainyy",
   "license": "ISC",
   "dependencies": {
-    "babel-preset-env": "^1.7.0",
     "react": "16.4.0",
     "react-dom": "16.4.0",
     "react-draggable": "3.0.5",
     "superagent": "3.8.2"
   },
   "devDependencies": {
+    "babel-preset-env": "^1.7.0",
     "babel-core": "6.17.0",
     "babel-loader": "7.1.4",
     "babel-preset-es2015": "6.16.0",
@@ -32,6 +32,7 @@
     "purifycss-webpack-plugin": "2.0.3",
     "react-hot-loader": "3.0.0-beta.6",
     "style-loader": "0.13.1",
+    "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "4.8.3",
     "webpack-cli": "2.1.4",
     "webpack-dev-server": "3.1.4",
