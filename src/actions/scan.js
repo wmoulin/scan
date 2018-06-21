@@ -9,10 +9,8 @@ export class ScanActions {
 
     static scan(isPreview, host, config, crop) {
         let queryParams = '?';
-        if (isPreview) {
-            queryParams += 'preview=true&';
-        }
         if (crop) {
+            queryParams += 'preview=true&';
             queryParams += 'originX=' + crop.originX + '&originY=' + crop.originY + '&width=' + crop.width + '&height=' + crop.height;
         }
 

@@ -103,7 +103,7 @@ export class App extends React.Component {
     if (this.state.dataOptions) {
       Object.keys(this.state.dataOptions).map((index) => {
         const option = this.state.dataOptions[index];
-        options.push(<option value={option.id} key={"list-scanner-" + index}>{option}</option>)
+        options.push(<option value={index} key={"list-scanner-" + index}>{option}</option>)
       })
     }
 
@@ -212,8 +212,8 @@ export class App extends React.Component {
   }
 
   handleClickScan(preview) {
-    let dataCrop = this.state.dataCrop;
-    ScanActions.scan(preview, this.state.dataHost, { idScanner: this.state.scannerSelected }, true).then((data) => {
+    let dataCrop = preview ? null : this.state.dataCrop;
+    ScanActions.scan(preview, this.state.dataHost, { idScanner: this.state.scannerSelected }, dataCrop).then((data) => {
       this.urlObjectImage = URL.createObjectURL(new Blob([this.fixBinary(atob(data.image))]));
       const { context, imageSource } = this.initContextAndImage(true, true);
       this.canvas.width = data.width;
@@ -237,7 +237,14 @@ export class App extends React.Component {
     var link = document.createElement("a");
     link.setAttribute("href", this.canvas.toDataURL('image/png'));
     link.setAttribute("download", this.state.fileName);
+
+    link.style.display = 'none';
+    document.body.appendChild(link);
     link.click();
+    setTimeout(function () {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+    }, 0);
   }
 
   initContextAndImage(clear, reset) {
