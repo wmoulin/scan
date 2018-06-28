@@ -23,7 +23,7 @@ export class App extends React.Component {
       scannerSelected: null,
       inProgress: false,
       isScanned: false,
-      fileName: "image"
+      fileName: "image.png"
     }
   }
 
