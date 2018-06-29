@@ -24,7 +24,8 @@ export class App extends React.Component {
       inProgress: false,
       isScanned: false,
       isScanning: false,
-      fileName: "image.png"
+      fileName: "image.png",
+      svgClass: "button-svg"
     }
   }
 
@@ -154,17 +155,17 @@ export class App extends React.Component {
   renderToolCrop() {
     return (
       <div>
-        <SvgButton handleClick={this.handleZoomCrop.bind(this, true)} id={"crop-in"} />
-        <SvgButton handleClick={this.handleZoomCrop.bind(this, false)} id={"crop-out"} />
-        <SvgButton handleClick={this.handleCrop.bind(this)} id={"crop"} />
+        <SvgButton handleClick={this.handleZoomCrop.bind(this, true)} id={"crop-in"} svgClass={this.state.svgClass}/>
+        <SvgButton handleClick={this.handleZoomCrop.bind(this, false)} id={"crop-out"} svgClass={this.state.svgClass}/>
+        <SvgButton handleClick={this.handleCrop.bind(this)} id={"crop"} svgClass={this.state.svgClass}/>
 
-        <SvgButton handleClick={this.handleRotate.bind(this, true)} id={"rotate-right"} />
-        <SvgButton handleClick={this.handleRotate.bind(this, false)} id={"rotate-left"} />
+        <SvgButton handleClick={this.handleRotate.bind(this, true)} id={"rotate-right"} svgClass={this.state.svgClass}/>
+        <SvgButton handleClick={this.handleRotate.bind(this, false)} id={"rotate-left"} svgClass={this.state.svgClass}/>
 
-        <SvgButton handleClick={this.handleSave.bind(this)} id={"save"} />
+        <SvgButton handleClick={this.handleSave.bind(this)} id={"save"} svgClass={this.state.svgClass}/>
 
-        <SvgButton handleClick={this.handleZoomImage.bind(this, true)} id={"zoom-in"} />
-        <SvgButton handleClick={this.handleZoomImage.bind(this, false)} id={"zoom-out"} />
+        <SvgButton handleClick={this.handleZoomImage.bind(this, true)} id={"zoom-in"} svgClass={this.state.svgClass}/>
+        <SvgButton handleClick={this.handleZoomImage.bind(this, false)} id={"zoom-out"} svgClass={this.state.svgClass}/>
       </div>
     )
   }
@@ -214,8 +215,7 @@ export class App extends React.Component {
 
   handleClickScan(preview) {
     let dataCrop = preview ? null : this.state.dataCrop;
-    this.setState({ isScanning: true });
-    this.setState({ isScanned: false });
+    this.setState({ isScanning: true, svgClass: 'button-svg-disabled' });
     ScanActions.scan(preview, this.state.dataHost, { idScanner: this.state.scannerSelected }, dataCrop).then((data) => {
       this.urlObjectImage = URL.createObjectURL(new Blob([this.fixBinary(atob(data.image))]));
       const { context, imageSource } = this.initContextAndImage(true, true);
@@ -225,7 +225,7 @@ export class App extends React.Component {
       imageSource.onload = () => {
         //context.translate((this.canvas.width - imageSource.width) / 2, (this.canvas.height - imageSource.height) / 2);
         context.drawImage(imageSource, 0, 0);//, imageSource.width, imageSource.height);
-        this.setState({ isScanned: true, isScanning: false });
+        this.setState({ isScanned: true, isScanning: false, svgClass: 'button-svg' });
       }
 
     }).catch(function (err) {
