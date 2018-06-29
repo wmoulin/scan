@@ -23,6 +23,7 @@ export class App extends React.Component {
       scannerSelected: null,
       inProgress: false,
       isScanned: false,
+      isScanning: false,
       fileName: "image.png"
     }
   }
@@ -120,8 +121,8 @@ export class App extends React.Component {
     return (
       <div className="element">
         <div id="actions">
-          <button title="Preview" onClick={this.handleClickScan.bind(this, true, false)} id="preview" className="action">Preview</button>
-          <button title="Scanner" onClick={this.handleClickScan.bind(this, false, true)} id="scanner" className="action">Scanner</button>
+          <button title="Preview" onClick={this.handleClickScan.bind(this, true, false)} id="preview" className="action" disabled={this.state.isScanning}>Scan full</button>
+          <button title="Scanner" onClick={this.handleClickScan.bind(this, false, true)} id="scanner" className="action" disabled={this.state.isScanning}>Scan short</button>
         </div>
       </div>
     );
@@ -213,6 +214,8 @@ export class App extends React.Component {
 
   handleClickScan(preview) {
     let dataCrop = preview ? null : this.state.dataCrop;
+    this.setState({ isScanning: true });
+    this.setState({ isScanned: false });
     ScanActions.scan(preview, this.state.dataHost, { idScanner: this.state.scannerSelected }, dataCrop).then((data) => {
       this.urlObjectImage = URL.createObjectURL(new Blob([this.fixBinary(atob(data.image))]));
       const { context, imageSource } = this.initContextAndImage(true, true);
@@ -222,7 +225,7 @@ export class App extends React.Component {
       imageSource.onload = () => {
         //context.translate((this.canvas.width - imageSource.width) / 2, (this.canvas.height - imageSource.height) / 2);
         context.drawImage(imageSource, 0, 0);//, imageSource.width, imageSource.height);
-        this.setState({ isScanned: true });
+        this.setState({ isScanned: true, isScanning: false });
       }
 
     }).catch(function (err) {
