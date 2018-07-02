@@ -105,7 +105,11 @@ export class App extends React.Component {
     if (this.state.dataOptions) {
       Object.keys(this.state.dataOptions).map((index) => {
         const option = this.state.dataOptions[index];
-        options.push(<option value={index} key={"list-scanner-" + index}>{option}</option>)
+        if (index == 0) {
+          options.push(<option value={index} key={"list-scanner-" + index} selected>{option}</option>);
+        } else {
+          options.push(<option value={index} key={"list-scanner-" + index}>{option}</option>);
+        }
       })
     }
 
