@@ -159,17 +159,18 @@ export class App extends React.Component {
   renderToolCrop() {
     return (
       <div>
-        <SvgButton handleClick={this.handleZoomCrop.bind(this, true)} id={"crop-in"} svgClass={this.state.svgClass}/>
-        <SvgButton handleClick={this.handleZoomCrop.bind(this, false)} id={"crop-out"} svgClass={this.state.svgClass}/>
-        <SvgButton handleClick={this.handleCrop.bind(this)} id={"crop"} svgClass={this.state.svgClass}/>
+        <SvgButton handleClick={this.handleZoomCrop.bind(this, true)} id={"crop-in"} svgClass={this.state.svgClass} title="Réduction du cadre"/>
+        <SvgButton handleClick={this.handleZoomCrop.bind(this, false)} id={"crop-out"} svgClass={this.state.svgClass} title="Agrandissement du cadre"/>
+        <SvgButton handleClick={this.handleCrop.bind(this)} id={"crop"} svgClass={this.state.svgClass} title="Rognage"/>
 
-        <SvgButton handleClick={this.handleRotate.bind(this, true)} id={"rotate-right"} svgClass={this.state.svgClass}/>
-        <SvgButton handleClick={this.handleRotate.bind(this, false)} id={"rotate-left"} svgClass={this.state.svgClass}/>
+        <SvgButton handleClick={this.handleRotate.bind(this, true)} id={"rotate-right"} svgClass={this.state.svgClass} title="Rotation vers la droite"/>
+        <SvgButton handleClick={this.handleRotate.bind(this, false)} id={"rotate-left"} svgClass={this.state.svgClass} title="Rotation vers la gauche"/>
 
-        <SvgButton handleClick={this.handleSave.bind(this)} id={"save"} svgClass={this.state.svgClass}/>
 
-        <SvgButton handleClick={this.handleZoomImage.bind(this, true)} id={"zoom-in"} svgClass={this.state.svgClass}/>
-        <SvgButton handleClick={this.handleZoomImage.bind(this, false)} id={"zoom-out"} svgClass={this.state.svgClass}/>
+        <SvgButton handleClick={this.handleZoomImage.bind(this, true)} id={"zoom-in"} svgClass={this.state.svgClass} title="Zoom avant"/>
+        <SvgButton handleClick={this.handleZoomImage.bind(this, false)} id={"zoom-out"} svgClass={this.state.svgClass} title="Zoom arrière"/>
+        <span id="spacer"></span>
+        <SvgButton handleClick={this.handleSave.bind(this)} id={"save"} svgClass={this.state.svgClass} title="Sauvegarde de l'image scannée"/>
       </div>
     )
   }
