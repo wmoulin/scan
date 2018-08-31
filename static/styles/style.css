@@ -7,10 +7,10 @@
     float: left;
   }
 .hornet-box {
-    border: 1px solid #999;
-    border-radius: 5px;
-    padding-left: 10px;
-    margin: 20px;
+    border: 0.063em solid #999;
+    border-radius: 0.313em;
+    padding-left: 0.625em;
+    margin: 1.250em;
     min-width:20em;
     min-height:30em;
     padding:1em
@@ -20,14 +20,14 @@
 }
 
 .action-element {  float: left;
-    margin: 18px 0;
+    margin: 1.125em 0;
     vertical-align: middle;
 }
 
 .cropper {
   background: transparent;
-  border: 1px solid #999;
-  border-radius: 3px;
+  border: 0.063em solid #999;
+  border-radius: 0.188em;
 }
 
 #image{
@@ -48,11 +48,11 @@
 }
 .react-draggable strong {
   background: #ddd;
-  border: 1px solid #999;
-  border-radius: 3px;
+  border: 0.063em solid #999;
+  border-radius: 0.188em;
   display: block;
-  margin-bottom: 10px;
-  padding: 3px 5px;
+  margin-bottom: 0.625em;
+  padding: 0.188em 0.313em;
   text-align: center;
 }
 
@@ -70,6 +70,21 @@ a .button-svg:hover, .button:focus {
 }
 
 .button-svg {
-  height: 36px;
-  width: 36px;
+  height: 2.250em;
+  width: 2.250em;
+}
+
+
+.button-svg-disabled {
+  pointer-events: none;
+  height: 2.250em;
+  width: 2.250em;
+}
+
+.button-svg-disabled path {
+  fill:grey;
+}
+
+#spacer {
+  padding-left: 5em;
 }
