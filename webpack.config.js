@@ -5,13 +5,12 @@ const validate = require('webpack-validator');
 const configParts = require('./webpack/config-parts');
 const pkg = require('./package.json');
 const webpack = require("webpack");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const PATHS = {
   client: path.join(__dirname, "index.js"),
-  style: [
-    path.join(__dirname, "node_modules", "purecss"),
-    path.join(__dirname, "static", "styles", "style.css")
-  ],
+  //style: path.join(__dirname, "static", "styles", "style.css"),
+  //images: path.join(__dirname, "static", "images", "sprite-scan.svg"),
   build: path.join(__dirname, "static", "js")
 };
 
@@ -21,7 +20,7 @@ const common = {
     client: PATHS.client
   },
   output: {
-    //path: "static",//PATHS.build,
+    path: path.join(__dirname, "dist"),//PATHS.build,
     filename: 'static/js/client.js'
   },
   resolve: {
@@ -33,8 +32,14 @@ const common = {
       filename: "./index.html"
     }),
     new webpack.DefinePlugin({
-      '(!self.Buffer && !window.Buffer)': '1 == 2'})
-  ],
+      '(!self.Buffer && !window.Buffer)': '1 == 2'}),
+    new CopyWebpackPlugin([
+        { from: 'static/styles', to: 'static/styles'}
+    ]),
+    new CopyWebpackPlugin([
+      { from: 'static/images', to: 'static/images'}
+  ])
+],
   module: {
     rules: [
       {
